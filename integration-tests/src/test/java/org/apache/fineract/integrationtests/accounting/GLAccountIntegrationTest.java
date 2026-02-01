@@ -124,6 +124,67 @@ public class GLAccountIntegrationTest extends BaseLoanIntegrationTest {
         });
     }
 
+    /**
+     * Test for FINERACT-2045: Verify that a newly created GL account can be deleted immediately
+     * without any "glAccountId attribute not present in managed type" error.
+     *
+     * This test verifies the fix where the deletion logic correctly uses root.get("glAccount").get("id")
+     * instead of trying to access a non-existent "glAccountId" field in JournalEntry entity.
+     */
+    @Test
+    public void testDeleteNewlyCreatedGLAccountWithoutAnyActivity() {
+        // Create a new GL account
+        String uniqueString = Utils.uniqueRandomStringGenerator("TEST_ACCOUNT_" + Calendar.getInstance().getTimeInMillis(), 5);
+        final PostGLAccountsResponse newAccount = createGLAccount(uniqueString);
+
+        // Verify account was created successfully
+        GetGLAccountsResponse accountDetails = AccountHelper.getGLAccount(newAccount.getResourceId());
+        Assertions.assertNotNull(accountDetails);
+        Assertions.assertEquals(uniqueString, accountDetails.getGlCode());
+
+        // Delete the account immediately without any activity
+        // This should succeed without throwing any JPA exception about glAccountId attribute
+        AccountHelper.deleteGLAccount(newAccount.getResourceId());
+
+        // Verify account was deleted - attempting to get it should fail or return null
+        // (We don't assert this as the helper might throw an exception, which is expected)
+    }
+
+    /**
+     * Test for FINERACT-2045: Verify deletion of GL account that meets all deletion criteria:
+     * - Not linked to any financial activity
+     * - Not mapped to any products
+     * - Does not have any journal entries
+     * - Is not a header account with children
+     */
+    @Test
+    public void testDeleteGLAccountWithNoDependencies() {
+        // Create multiple GL accounts of different types to ensure the fix works across all account types
+
+        // Asset account
+        String assetAccount = Utils.uniqueRandomStringGenerator("ASSET_" + Calendar.getInstance().getTimeInMillis(), 5);
+        PostGLAccountsResponse assetGLAccount = AccountHelper.createGLAccount(
+                new PostGLAccountsRequest().type(GLAccountType.ASSET.getValue()).glCode(assetAccount)
+                        .manualEntriesAllowed(true).usage(1).description(assetAccount).name(assetAccount));
+
+        // Liability account
+        String liabilityAccount = Utils.uniqueRandomStringGenerator("LIABILITY_" + Calendar.getInstance().getTimeInMillis(), 5);
+        PostGLAccountsResponse liabilityGLAccount = AccountHelper.createGLAccount(
+                new PostGLAccountsRequest().type(GLAccountType.LIABILITY.getValue()).glCode(liabilityAccount)
+                        .manualEntriesAllowed(true).usage(1).description(liabilityAccount).name(liabilityAccount));
+
+        // Expense account
+        String expenseAccount = Utils.uniqueRandomStringGenerator("EXPENSE_" + Calendar.getInstance().getTimeInMillis(), 5);
+        PostGLAccountsResponse expenseGLAccount = AccountHelper.createGLAccount(
+                new PostGLAccountsRequest().type(GLAccountType.EXPENSE.getValue()).glCode(expenseAccount)
+                        .manualEntriesAllowed(true).usage(1).description(expenseAccount).name(expenseAccount));
+
+        // Delete all accounts - should succeed without JPA exceptions
+        AccountHelper.deleteGLAccount(assetGLAccount.getResourceId());
+        AccountHelper.deleteGLAccount(liabilityGLAccount.getResourceId());
+        AccountHelper.deleteGLAccount(expenseGLAccount.getResourceId());
+    }
+
     private PostGLAccountsResponse createGLAccount(String uniqueString) {
         return AccountHelper.createGLAccount(new PostGLAccountsRequest().type(GLAccountType.INCOME.getValue()).glCode(uniqueString)
                 .manualEntriesAllowed(true).usage(1).description(uniqueString).name(uniqueString));
