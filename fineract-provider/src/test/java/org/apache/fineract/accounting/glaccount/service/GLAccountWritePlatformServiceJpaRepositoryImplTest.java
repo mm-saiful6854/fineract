@@ -43,8 +43,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
- * Unit tests for GLAccountWritePlatformServiceJpaRepositoryImpl
- * specifically testing the fix for FINERACT-2045
+ * Unit tests for GLAccountWritePlatformServiceJpaRepositoryImpl specifically testing the fix for FINERACT-2045
  */
 @ExtendWith(MockitoExtension.class)
 class GLAccountWritePlatformServiceJpaRepositoryImplTest {
@@ -82,8 +81,8 @@ class GLAccountWritePlatformServiceJpaRepositoryImplTest {
     }
 
     /**
-     * Test for FINERACT-2045: Verify that a GL account can be deleted when it has no dependencies.
-     * This test ensures the fix correctly uses root.get("glAccount").get("id") in the JPA criteria query
+     * Verify that a GL account can be deleted when it has no dependencies. This test ensures the fix correctly uses
+     * root.get("glAccount").get("id") in the JPA criteria query
      * instead of the incorrect root.get("glAccountId") which caused the original error.
      */
     @Test
