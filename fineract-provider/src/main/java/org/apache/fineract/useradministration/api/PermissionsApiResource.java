@@ -71,15 +71,15 @@ public class PermissionsApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "List Application Permissions", description = "ARGUMENTS\n"
-            + "makerCheckerableoptional, Values are true, false. Default is false.\n"
-            + "If makerCheckerable=false or not supplied then a list of application permissions is returned. The \"selected\" attribute is always true in this case.\n"
-            + "\n"
-            + "If makerCheckerable=true then the \"selected\" attribute shows whether the permission is enabled for Maker Check functionality.\n"
-            + "\n" + "Note: Each Apache Fineract transaction is associated with a permission.\n" + "\n" + "Example Requests:\n" + "\n"
-            + "permissions\n" + "\n" + "\n" + "permissions?makerCheckerable=true\n" + "\n" + "\n" + "permissions?fields=grouping,code")
+    @Operation(summary = "List Application Permissions", operationId = "retrieveAllPermissions", tags = {
+            "Permissions" }, description = "ARGUMENTS\n" + "makerCheckerableoptional, Values are true, false. Default is false.\n"
+                    + "If makerCheckerable=false or not supplied then a list of application permissions is returned. The \"selected\" attribute is always true in this case.\n"
+                    + "\n"
+                    + "If makerCheckerable=true then the \"selected\" attribute shows whether the permission is enabled for Maker Check functionality.\n"
+                    + "\n" + "Note: Each Apache Fineract transaction is associated with a permission.\n" + "\n" + "Example Requests:\n"
+                    + "\n" + "permissions\n" + "\n" + "\n" + "permissions?makerCheckerable=true\n" + "\n" + "\n"
+                    + "permissions?fields=grouping,code")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PermissionsApiResourceSwagger.GetPermissionsResponse.class)))) })
     public String retrieveAllPermissions(@Context final UriInfo uriInfo) {
@@ -101,7 +101,8 @@ public class PermissionsApiResource {
     @PUT
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Enable/Disable Permissions for Maker Checker", description = "")
+    @Operation(summary = "Enable/Disable Permissions for Maker Checker", operationId = "updatePermissions", tags = {
+            "Permissions" }, description = "")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = PermissionsApiResourceSwagger.PutPermissionsRequest.class)))
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class))) })

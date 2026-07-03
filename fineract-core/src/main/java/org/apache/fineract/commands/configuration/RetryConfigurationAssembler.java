@@ -25,7 +25,6 @@ import io.github.resilience4j.retry.RetryRegistry;
 import java.util.Arrays;
 import lombok.AllArgsConstructor;
 import org.apache.fineract.batch.service.BatchExecutionException;
-import org.apache.fineract.commands.exception.CommandResultPersistenceException;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
 import org.springframework.stereotype.Service;
@@ -36,7 +35,6 @@ public class RetryConfigurationAssembler {
 
     public static final String EXECUTE_COMMAND = "executeCommand";
     public static final String BATCH_RETRY = "batchRetry";
-    public static final String COMMAND_RESULT_PERSISTENCE = "commandResultPersistence";
     private static final String LAST_EXECUTION_EXCEPTION_KEY = "LAST_EXECUTION_EXCEPTION";
     private final RetryRegistry registry;
     private final FineractProperties fineractProperties;
@@ -56,7 +54,7 @@ public class RetryConfigurationAssembler {
 
     public Retry getRetryConfigurationForExecuteCommand() {
         Class<? extends Throwable>[] exceptionList = fineractProperties.getRetry().getInstances().getExecuteCommand().getRetryExceptions();
-        RetryConfig.Builder configBuilder = buildCommonExecuteCommandConfiguration();
+        RetryConfig.Builder<Throwable> configBuilder = buildCommonExecuteCommandConfiguration();
 
         if (exceptionList != null) {
             configBuilder.retryOnException(ex -> {
@@ -71,7 +69,7 @@ public class RetryConfigurationAssembler {
 
     public Retry getRetryConfigurationForBatchApiWithEnclosingTransaction() {
         Class<? extends Throwable>[] exceptionList = fineractProperties.getRetry().getInstances().getExecuteCommand().getRetryExceptions();
-        RetryConfig.Builder configBuilder = buildCommonExecuteCommandConfiguration();
+        RetryConfig.Builder<Throwable> configBuilder = buildCommonExecuteCommandConfiguration();
 
         if (exceptionList != null) {
             configBuilder.retryOnException(ex -> {
@@ -89,10 +87,10 @@ public class RetryConfigurationAssembler {
         return registry.retry(BATCH_RETRY, config);
     }
 
-    private RetryConfig.Builder buildCommonExecuteCommandConfiguration() {
+    private RetryConfig.Builder<Throwable> buildCommonExecuteCommandConfiguration() {
         var props = fineractProperties.getRetry().getInstances().getExecuteCommand();
 
-        RetryConfig.Builder configBuilder = RetryConfig.custom().maxAttempts(props.getMaxAttempts());
+        RetryConfig.Builder<Throwable> configBuilder = RetryConfig.<Throwable>custom().maxAttempts(props.getMaxAttempts());
 
         if (props.getWaitDuration() != null && props.getWaitDuration().toMillis() >= 0) {
             if (Boolean.TRUE.equals(props.getEnableExponentialBackoff())) {
@@ -108,14 +106,5 @@ public class RetryConfigurationAssembler {
         }
 
         return configBuilder;
-    }
-
-    public Retry getRetryConfigurationForCommandResultPersistence() {
-        RetryConfig.Builder configBuilder = buildCommonExecuteCommandConfiguration();
-
-        configBuilder.retryOnException(e -> e instanceof RuntimeException && !(e instanceof CommandResultPersistenceException));
-
-        RetryConfig config = configBuilder.build();
-        return registry.retry(COMMAND_RESULT_PERSISTENCE, config);
     }
 }

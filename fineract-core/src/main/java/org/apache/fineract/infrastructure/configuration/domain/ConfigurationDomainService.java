@@ -151,4 +151,32 @@ public interface ConfigurationDomainService {
     boolean isImmediateChargeAccrualPostMaturityEnabled();
 
     String getAssetOwnerTransferOustandingInterestStrategy();
+
+    boolean isForceWithdrawalOnSavingsAccountEnabled();
+
+    Long retrieveForceWithdrawalOnSavingsAccountLimit();
+
+    Integer getPasswordReuseRestrictionCount();
+
+    boolean isForcePasswordResetOnFirstLoginEnabled();
+
+    boolean isMaxLoginRetriesEnabled();
+
+    Integer retrieveMaxLoginRetries();
+
+    String getIncomeExpenseGlAccounts();
+
+    String getRetainedEarningGlAccount();
+
+    Long getLastDayOfFinancialYear();
+
+    Long getLastMonthOfFinancialYear();
+
+    String getRetainedEarningUsedByReportName();
+
+    Long getOfficeId();
+
+    boolean isAllowCashAndNonCashAccrual();
+
+    boolean isBlockTransactionsOnClosedOverpaidLoansEnabled();
 }

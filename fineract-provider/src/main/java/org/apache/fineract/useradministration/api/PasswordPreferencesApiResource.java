@@ -64,10 +64,11 @@ public class PasswordPreferencesApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PasswordPreferencesApiResourceSwagger.GetPasswordPreferencesTemplateResponse.class))) })
+    @Operation(summary = "List Password Preferences", operationId = "retrieveAllPasswordPreferences", description = "Returns the password policies and their current status (active/inactive).", tags = {
+            "Password preferences" })
     public String retrieve(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(PasswordPreferencesApiConstants.ENTITY_NAME);
@@ -83,7 +84,8 @@ public class PasswordPreferencesApiResource {
     @PUT
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Update password preferences", description = "")
+    @Operation(summary = "Update password preferences", operationId = "updatePasswordPreferences", tags = {
+            "Password preferences" }, description = "")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = PasswordPreferencesApiResourceSwagger.PutPasswordPreferencesTemplateRequest.class)))
     @ApiResponses({ @ApiResponse(responseCode = "200", description = "OK") })
     public String update(@Parameter(hidden = true) final String apiRequestBodyAsJson) {
@@ -100,10 +102,9 @@ public class PasswordPreferencesApiResource {
 
     @GET
     @Path("/template")
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "List Application Password validation policies", description = "ARGUMENTS\n" + "Example Requests:\n" + "\n"
-            + "passwordpreferences")
+    @Operation(summary = "List Application Password validation policies", operationId = "retrieveTemplatePasswordPreferences", tags = {
+            "Password preferences" }, description = "ARGUMENTS\n" + "Example Requests:\n" + "\n" + "passwordpreferences")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PasswordPreferencesApiResourceSwagger.GetPasswordPreferencesTemplateResponse.class)))) })
     public String template(@Context final UriInfo uriInfo) {

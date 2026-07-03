@@ -53,7 +53,7 @@ import org.apache.fineract.infrastructure.security.utils.SQLBuilder;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.organisation.staff.data.StaffData;
-import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
+import org.apache.fineract.organisation.staff.service.StaffReadService;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
@@ -86,7 +86,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
     private final OfficeReadPlatformService officeReadPlatformService;
     private final ClientReadPlatformService clientReadPlatformService;
     private final LoanProductReadPlatformService loanProductReadPlatformService;
-    private final StaffReadPlatformService staffReadPlatformService;
+    private final StaffReadService staffReadPlatformService;
     private final PaginationHelper paginationHelper;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final PaginationParametersDataValidator paginationParametersDataValidator;
@@ -107,7 +107,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             String partSql = " aud.id as id, aud.action_name as actionName, aud.entity_name as entityName,"
                     + " aud.resource_id as resourceId, aud.subresource_id as subresourceId,aud.client_id as clientId, aud.loan_id as loanId,"
                     + " mk.username as maker, aud.made_on_date as madeOnDate, aud.made_on_date_utc as madeOnDateUTC, aud.api_get_url as resourceGetUrl, "
-                    + "ck.username as checker, aud.checked_on_date as checkedOnDate, aud.checked_on_date_utc as checkedOnDateUTC,  ev.enum_message_property as processingResult "
+                    + "ck.username as checker, aud.checked_on_date as checkedOnDate, aud.checked_on_date_utc as checkedOnDateUTC,  ev.enum_value as processingResult "
                     + commandAsJsonString + ", "
                     + " o.name as officeName, gl.level_name as groupLevelName, g.display_name as groupName, c.display_name as clientName, "
                     + " l.account_no as loanAccountNo, s.account_no as savingsAccountNo , aud.client_ip  as ip "
@@ -116,7 +116,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
                     + " left join m_group g on g.id = aud.group_id" + " left join m_group_level gl on gl.id = g.level_id"
                     + " left join m_client c on c.id = aud.client_id" + " left join m_loan l on l.id = aud.loan_id"
                     + " left join m_savings_account s on s.id = aud.savings_account_id"
-                    + " left join r_enum_value ev on ev.enum_name = 'status' and ev.enum_id = aud.status";
+                    + " left join r_enum_value ev on ev.enum_name = 'processing_result_enum' and ev.enum_id = aud.status";
 
             // data scoping: head office (hierarchy = ".") can see all audit
             // entries
@@ -393,7 +393,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
                     commandAsJsonMap.remove(typeName);
 
                     final Integer enumTypeId = auditObject.get(typeName).getAsInt();
-                    final String code = SavingsEnumerations.savingEnumueration(typeName, enumTypeId).getValue();
+                    final String code = SavingsEnumerations.savingEnumeration(typeName, enumTypeId).getValue();
                     if (code != null) {
                         commandAsJsonMap.put(typeName, code);
                     }
@@ -501,7 +501,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         }
 
         public String schema() {
-            return " select enum_id as id, enum_message_property as status from r_enum_value where enum_name = 'status' "
+            return " select enum_id as id, enum_value as status from r_enum_value where enum_name = 'processing_result_enum' "
                     + " order by enum_id";
         }
     }
